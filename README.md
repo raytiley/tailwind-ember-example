@@ -72,11 +72,32 @@ module.exports = function(defaults) {
 </div>
 ```
 
+## Step 6 (Optional) - Modify tailwind config to purge unused css
+
+Thanks to @kamal on twitter who pointed out that Tailwind now ships with a purge option. Make the following changes to the `tailwindcss-config.js` to scan the `index.html` and `hbs` template files for css classes. This will greatly reduce the size of the css shipped to the browser. In this sample app the css file went from 2.73MB in development to 2.75 KB when purged.
+
+See (https://tailwindcss.com/docs/optimizing-for-production) for more information about the purge option. Note that tailwind will only purge when `NODE_ENV=production`. `ember-cli` doesn't set the NODE_ENV to production by default, to get a purged build I ran the following command:
+
+`NODE_ENV=production ember build --prod`
+
+```
+/* config/tailwindcss-config.js */
+ const colors = require('tailwindcss/colors')
+ 
+ module.exports = {
+-  purge: [],
++  purge: [
++    './app/**/*.html',
++    './app/**/*.hbs',
++  ],
+   presets: [],
+   darkMode: false, // or 'media' or 'class'
+   theme: {
+```
+
 # TODO
 
 Modifying the `tailwindcss-config.js` doesn't regenerate the css, which is kinda a pain when trying to tweak your config. You need to stop / start `ember s` to pickup the changes. If anyone knows how to resolve that please open a PR :)
-
-With a real production app configuring something like `PurgeCSS` would also be useful to exclude unused CSS.
 
 # Thanks
 Thanks to the awesome develepors that build all the tools that make this all possible.
