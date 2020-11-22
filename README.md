@@ -1,57 +1,82 @@
 # tailwind-example
 
-This README outlines the details of collaborating on this Ember application.
-A short introduction of this app could easily go here.
+All the examples I found just after Tailwind 2.0s release cover getting Tailwind 1.x into an Ember app. The setup is just slightly different, enough to give some weird errors. For someone not very familiar with `PostCSS` it was confusing. I put this example repository together to figure out a minimal working example. Hope it helps someone else.
 
-## Prerequisites
+## Step 1 - Installing Dependencies
 
-You will need the following things properly installed on your computer.
+If you are already using `ember-cli-postcss` make sure to update to latest `v7` version. Tailwind 2.x switches to `PostCSS v8`. See the `ember-cli-postcss` README for specifics of ther version: (https://github.com/jeffjewiss/ember-cli-postcss)
 
-* [Git](https://git-scm.com/)
-* [Node.js](https://nodejs.org/) (with npm)
-* [Ember CLI](https://ember-cli.com/)
-* [Google Chrome](https://google.com/chrome/)
+```
+ember install ember-cli-postcss
+npm install --save-dev tailwindcss autoprefixer
+```
 
-## Installation
+## Step 2 - Create a tailwind config file
 
-* `git clone <repository-url>` this repository
-* `cd tailwind-example`
-* `npm install`
+`npx tailwindcss init config/tailwindcss-config.js --full `
 
-## Running / Development
+## Step 3 - Configure `ember-cli-build.js`
 
-* `ember serve`
-* Visit your app at [http://localhost:4200](http://localhost:4200).
-* Visit your tests at [http://localhost:4200/tests](http://localhost:4200/tests).
+This is the part that's a big different. The configuration used to take an array of modules, and the tailwind plugin was passed the location of the config by calling the module. 
 
-### Code Generators
+With tailwind 2.0, ember-cli-postcss v7, and PostCSS v8 the configuration excepts an array of objects each containing a `module` and an `options` property.
 
-Make use of the many generators for code, try `ember help generate` for more details
+```
+/* ember-cli-build.js */
 
-### Running Tests
+'use strict';
 
-* `ember test`
-* `ember test --server`
+const EmberApp = require('ember-cli/lib/broccoli/ember-app');
+const autoprefixer = require('autoprefixer');
+const tailwind = require('tailwindcss');
 
-### Linting
+module.exports = function(defaults) {
+  let app = new EmberApp(defaults, {
+    postcssOptions: {
+      compile: {
+        plugins: [
+          {
+            module: autoprefixer,
+            options: {}
+          },
+          {
+            module: tailwind,
+            options: {
+              config: './config/tailwindcss-config.js'
+            }
+          }
+        ],
+      }
+    }
+  });
 
-* `npm run lint:hbs`
-* `npm run lint:js`
-* `npm run lint:js -- --fix`
+  return app.toTree();
+};
+```
 
-### Building
+## Step 4 - Import Tailwind in app.css
 
-* `ember build` (development)
-* `ember build --environment production` (production)
+```
+// app/stytles/app.css
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
 
-### Deploying
+## Step 5 - Replace application.hbs with tailwind css
 
-Specify what it takes to deploy your app.
+```
+{{!-- app/templates/application.hbs --}}
+<div class="container mx-auto">
+  <h1 class="font-mono text-blue-500">Hello Tailwind</h1>
+</div>
+```
 
-## Further Reading / Useful Links
+# TODO
 
-* [ember.js](https://emberjs.com/)
-* [ember-cli](https://ember-cli.com/)
-* Development Browser Extensions
-  * [ember inspector for chrome](https://chrome.google.com/webstore/detail/ember-inspector/bmdblncegkenkacieihfhpjfppoconhi)
-  * [ember inspector for firefox](https://addons.mozilla.org/en-US/firefox/addon/ember-inspector/)
+Modifying the `tailwindcss-config.js` doesn't regenerate the css, which is kinda a pain when trying to tweak your config. You need to stop / start `ember s` to pickup the changes. If anyone knows how to resolve that please open a PR :)
+
+With a real production app configuring something like `PurgeCSS` would also be useful to exclude unused CSS.
+
+# Thanks
+Thanks to the awesome develepors that build all the tools that make this all possible.
