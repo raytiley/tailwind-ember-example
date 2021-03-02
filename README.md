@@ -17,7 +17,7 @@ npm install --save-dev tailwindcss autoprefixer
 
 ## Step 3 - Configure `ember-cli-build.js`
 
-This is the part that's a big different. The configuration used to take an array of modules, and the tailwind plugin was passed the location of the config by calling the module. 
+This is the part that's a bit different. The configuration used to take an array of modules, and the tailwind plugin was passed the location of the config by calling the module. 
 
 With tailwind 2.0, ember-cli-postcss v7, and PostCSS v8 the configuration excepts an array of objects each containing a `module` and an `options` property.
 
